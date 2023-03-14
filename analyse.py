@@ -4,12 +4,12 @@ import dlib
 import csv
 import numpy as np
 
-cap = cv2.VideoCapture("full2.mp4")
+cap = cv2.VideoCapture("videos/full2.mp4")
 trackers = []
 frame_count = 0
 attention = " "
 size = (640, 360)
-f = open('out.csv', 'w')
+f = open('output/out.csv', 'w')
 writer = csv.writer(f)
 writer.writerow(("seconds", "luuk", "jan", "carlos", "mayank"))
 
