@@ -1,6 +1,7 @@
 install.packages("forecast")
 library(forecast)
 
+# specify the right path (folder data)
 data <- read.csv("recording1.csv")
 
 ts_data <- ts(data$sum, start = 1, frequency = 1)
