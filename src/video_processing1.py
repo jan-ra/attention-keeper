@@ -3,36 +3,51 @@ import face_recognition
 import dlib
 import csv
 import numpy as np
-import sys
 
-lesson_id = sys.argv[1]
-student_amount = sys.argv[2]
-start_sec = sys.argv[3]
-
-cap = cv2.VideoCapture("inputs/lesson" + str(lesson_id) + "/video.mp4")
-cap.set(cv2.CAP_PROP_POS_FRAMES, int(start_sec) * 30)
+cap = cv2.VideoCapture("inputs/lesson1/video.mp4")
 trackers = []
 frame_count = 0
-
-f = open("calibration/lesson" + str(lesson_id) + "/face_locations.csv", 'w')
+attention = " "
+size = (640, 360)
+f = open("processed/lesson1/faces.csv", 'w')
 writer = csv.writer(f)
+writer.writerow(("seconds", "luuk", "jan", "carlos", "mayank"))
+
+result = cv2.VideoWriter('filename.avi',
+                         cv2.VideoWriter_fourcc(*'MJPG'),
+                         25, size)
 
 while True:
     # Grab a single frame of video
     ret, frame = cap.read()    # Convert the image from BGR color (which OpenCV uses) to RGB
-    frame = cv2.resize(frame, (854, 480))  # Resize video
+    frame = cv2.resize(frame, (640, 360))
+    # rgb_frame = frame[:, :, ::-1]
+
     image_cpy = np.copy(frame)
 
     if frame_count % 30 == 0:
         trackers = []
+        att0 = 0
+        att1 = 0
+        att2 = 0
+        att3 = 0
         face_locations = face_recognition.face_locations(image_cpy)
+        print(face_locations)
+        for top, right, bottom, left in face_locations:
+            if right >= 480:
+                att3 = 1
+            elif right >= 320:
+                att2 = 1
+            elif right >= 160:
+                att1 = 1
+            elif right >= 0:
+                att0 = 1
 
-        face_count = "face count: " + \
-            str(len(face_locations)) + " of " + str(student_amount)
-        print("second: " + str(int(frame_count/30)))
-        print(face_count)
-        if len(face_locations) == int(student_amount):
-            print(face_locations)
+        print("sec: " + str(frame_count/30))
+        attention = "luuk : " + str(att0) + ", jan: " + str(att1) + \
+            ", carlos: " + str(att2) + ", mayan: " + str(att3)
+        print(attention)
+        writer.writerow((frame_count/30, att0, att1, att2, att3))
 
         for top, right, bottom, left in face_locations:
             # Draw a box around the face
@@ -60,23 +75,20 @@ while True:
     frame_count += 1
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(image_cpy,
-                face_count,
+                attention,
                 (50, 50),
                 font, 1,
                 (0, 255, 255),
                 2,
                 cv2.LINE_4)
+    result.write(image_cpy)
     cv2.imshow('Video', image_cpy)
 
     # Wait for Enter key to stop
     if cv2.waitKey(25) == 13:
         break
-writer.writerow(("id", "left", "top", "right", "bottom"))
-id = 0
-for top, right, bottom, left in face_locations:
-    writer.writerow((id, left, top, right, bottom))
-    id += 1
 
-print("saved location data to: face_locations.csv")
+result.release()
 cap.release()
 cv2.destroyAllWindows()
+f.close()
