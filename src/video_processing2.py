@@ -4,23 +4,23 @@ import dlib
 import csv
 import numpy as np
 
-cap = cv2.VideoCapture("videos/full2.mp4")
+cap = cv2.VideoCapture("inputs/lesson2/video.mp4")
 trackers = []
 frame_count = 0
 attention = " "
-size = (640, 360)
-f = open('output/out.csv', 'w')
+size = (854, 480)
+f = open("processed/lesson2/faces.csv", 'w')
 writer = csv.writer(f)
-writer.writerow(("seconds", "luuk", "jan", "carlos", "mayank"))
+writer.writerow(("seconds", "gregoire", "mayank", "carlos", "jan", "luuk"))
 
 result = cv2.VideoWriter('filename.avi',
                          cv2.VideoWriter_fourcc(*'MJPG'),
-                         24, size)
+                         25, size)
 
 while True:
     # Grab a single frame of video
     ret, frame = cap.read()    # Convert the image from BGR color (which OpenCV uses) to RGB
-    frame = cv2.resize(frame, (640, 360))
+    frame = cv2.resize(frame, size)
     # rgb_frame = frame[:, :, ::-1]
 
     image_cpy = np.copy(frame)
@@ -31,23 +31,27 @@ while True:
         att1 = 0
         att2 = 0
         att3 = 0
+        att4 = 0
         face_locations = face_recognition.face_locations(image_cpy)
         print(face_locations)
         for top, right, bottom, left in face_locations:
-            if right >= 480:
+            if right >= 678:
+                att4 = 1
+            elif right >= 531:
                 att3 = 1
-            elif right >= 320:
+            elif right >= 393:
                 att2 = 1
-            elif right >= 160:
+            elif right >= 243:
                 att1 = 1
             elif right >= 0:
                 att0 = 1
 
         print("sec: " + str(frame_count/30))
-        attention = "luuk : " + str(att0) + ", jan: " + str(att1) + \
-            ", carlos: " + str(att2) + ", mayan: " + str(att3)
+        attention = "gregoire : " + str(att0) + ", mayank: " + str(att1) + \
+            ", carlos: " + str(att2) + ", jan: " + \
+            str(att3)+",  luuk: " + str(att4)
         print(attention)
-        writer.writerow((frame_count/30, att0, att1, att2, att3))
+        writer.writerow((frame_count/30, att0, att1, att2, att3, att4))
 
         for top, right, bottom, left in face_locations:
             # Draw a box around the face
@@ -77,7 +81,7 @@ while True:
     cv2.putText(image_cpy,
                 attention,
                 (50, 50),
-                font, 1,
+                font, 0.5,
                 (0, 255, 255),
                 2,
                 cv2.LINE_4)
